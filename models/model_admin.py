@@ -16,7 +16,7 @@ class ModelAdmin:
             update(cls)
             .where(cls.id == id)
             .values(**kwargs)
-            #.execution_options(synchronize_session="fetch")
+            .execution_options(synchronize_session="fetch")
         )
 
         await async_db_session.execute(query)

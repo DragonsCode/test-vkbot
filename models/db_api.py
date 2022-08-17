@@ -17,21 +17,26 @@ class methods:
             user = await User.get_all()
             return user
     
-    async def create_user(id: int, name: str, about: str, coins: int, last_time=datetime.now()):
+    async def create_user(id: int, name: str, age: int, about: str, coins: int, last_time=datetime.now()):
+        user = await User.get(id=id)
+        if user is not None:
+            return 'duplicate for this peer id'
         await User.create(
             id=id,
             name=name,
+            age=age,
             about=about,
             coins=coins,
             last_time=last_time,
         )
-        return
+        return 'created successfully'
     
-    async def edit_user(id: int, name: str, about: str, coins: str, last_time=datetime.now()):
+    async def edit_user(id: int, name: str, age:int, about: str, coins: str, last_time=datetime.now()):
         #user = User.get(peer)
         await User.update(
             id=id,
             name=name,
+            age=age,
             about=about,
             coins=coins,
             last_time=last_time,

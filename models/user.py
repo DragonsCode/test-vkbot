@@ -10,9 +10,10 @@ from database import Base, async_db_session
 class User(Base, ModelAdmin):
     __tablename__ = "users"
 
-    #id = Column(Integer, primary_key=True, autoincrement=True)
-    id = Column(Integer, primary_key=True)
+    num = Column(Integer, primary_key=True, autoincrement=True)
+    id = Column(Integer)
     name = Column(String(100))
+    age = Column(Integer)
     about = Column(String(500))
     coins = Column(Integer)
     posts = relationship("Post")
@@ -40,6 +41,6 @@ class User(Base, ModelAdmin):
             f"full_name={self.name}, "
             f"about={self.about}, "
             f"coins={self.coins}, "
-            f"posts={self.posts}, "
+            #f"posts={self.posts}, "
             f")>"
         )

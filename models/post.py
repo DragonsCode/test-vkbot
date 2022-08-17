@@ -7,8 +7,11 @@ from database import Base
 class Post(Base, ModelAdmin):
     __tablename__ = "posts"
     id = Column(Integer, primary_key=True, autoincrement=True)
-    peer = Column(ForeignKey("users.id"))
+    peer = Column(ForeignKey("users.num"))
     data = Column(String(1000))
+
+    def __str__(self):
+        return f'Creator: {self.peer}\n\nPost: {self.data}'
 
     def __repr__(self):
         return (
