@@ -1,7 +1,7 @@
 from sqlalchemy import update
 from sqlalchemy.future import select
 
-from database import async_db_session
+from models.database import async_db_session
 
 
 class ModelAdmin:
@@ -11,7 +11,7 @@ class ModelAdmin:
         await async_db_session.commit()
 
     @classmethod
-    async def update(cls, id, **kwargs):
+    async def updater(cls, id, **kwargs):
         query = (
             update(cls)
             .where(cls.id == id)
@@ -44,6 +44,18 @@ class ModelAdmin:
             query = select(cls).where(cls.id == id)
         else:
             query = select(cls)
-        results = await async_db_session.execute(query)
+        results = None
+        try:
+            results = await async_db_session.execute(query)
+        except:
+            await async_db_session.rollback()
+            results = await async_db_session.execute(query)
         result = results.scalars().all()
+        return result
+    
+    @classmethod
+    async def get_by_id(cls, id):
+        query = select(cls).where(cls.num == id)
+        results = await async_db_session.execute(query)
+        result = results.scalars().first()
         return result

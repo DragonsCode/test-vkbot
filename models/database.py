@@ -14,7 +14,11 @@ class AsyncDatabaseSession:
 
     async def init(self):
         self._engine = create_async_engine("mysql+aiomysql://b04966b49da3b5:858d2485@us-cdbr-east-05.cleardb.net:3306/heroku_9604cd8eb0a269c",
-            echo=True
+            pool_recycle=1800,
+            pool_pre_ping=True,
+            pool_size=10,
+            echo_pool=True
+            #echo=True
         )
 
         self._session = sessionmaker(

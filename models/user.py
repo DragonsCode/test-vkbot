@@ -1,10 +1,11 @@
+from unicodedata import category
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
 
 from sqlalchemy.future import select
 
-from model_admin import ModelAdmin
-from database import Base, async_db_session
+from models.model_admin import ModelAdmin
+from models.database import Base, async_db_session
 
 
 class User(Base, ModelAdmin):
@@ -17,6 +18,8 @@ class User(Base, ModelAdmin):
     about = Column(String(500))
     coins = Column(Integer)
     posts = relationship("Post")
+    category = Column(String(100))
+    bonus = Column(Integer, default=0)
     last_time = Column(DateTime)
 
     # required in order to acess columns with server defaults
@@ -24,15 +27,8 @@ class User(Base, ModelAdmin):
     # triggering an expired load
     #__mapper_args__ = {"eager_defaults": True}
 
-    @classmethod
-    async def get_by_id(cls, id):
-        query = select(cls).where(cls.id == id)
-        results = await async_db_session.execute(query)
-        result = results.one()
-        return result
-
     def __str__(self):
-        return f'Name: {self.name}\nAge: {self.age}\nBalance: {self.coins} coins\nAbout: {self.about}'
+        return f'Name: {self.name}\nAge: {self.age}\nBalance: {self.coins} coins\nAbout: {self.about}\nInterested in: {self.category}'
 
     def __repr__(self):
         return (
@@ -41,6 +37,7 @@ class User(Base, ModelAdmin):
             f"full_name={self.name}, "
             f"about={self.about}, "
             f"coins={self.coins}, "
+            f"category={self.category}"
             #f"posts={self.posts}, "
             f")>"
         )
