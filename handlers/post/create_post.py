@@ -1,5 +1,5 @@
 from vkbottle.bot import Blueprint, Message
-from vkbottle import Keyboard, Text
+from vkbottle import Keyboard, KeyboardButtonColor, Text
 
 from models.db_api import methods as db
 from states import PostData, ctx
@@ -10,10 +10,10 @@ bot = Blueprint('create_post')
 async def create_post(message: Message):
     keyboard = Keyboard(one_time=True)
 
-    keyboard.add(Text('Name'))
-    keyboard.add(Text('Age'))
-    keyboard.add(Text('Category'))
-    keyboard.add(Text('About'))
+    keyboard.add(Text('News'))
+    keyboard.add(Text('Gaming'))
+    keyboard.add(Text('IT'))
+    keyboard.add(Text('Economy'))
 
     
     user = await db.get_user(id=message.peer_id)
@@ -26,8 +26,24 @@ async def create_post(message: Message):
 
         await message.answer('You are not registered, type "reg" to start the registration', keyboard=keyboard)
         return
+    elif user.coins < 1:
+        keyboard = Keyboard(one_time=True)
+        keyboard.add(Text('Back', {'cmd': 'menu'}), color=KeyboardButtonColor.NEGATIVE)
 
-    await message.answer('Choose the category for your post')
+        await message.answer('You do not have enough coins!\nRemember that creating one post will cost you one coin', keyboard=keyboard)
+        return
+    
+    await db.edit_user(
+        id=user.id,
+        name=user.name,
+        age=user.age,
+        about=user.about,
+        coins=user.coins-1,
+        category=user.category,
+        bonus=user.bonus
+    )
+
+    await message.answer('Choose the category for your post', keyboard=keyboard)
     await bot.state_dispenser.set(message.peer_id, PostData.CATEGORY)
 
 
@@ -57,7 +73,7 @@ async def post_title(message: Message):
     return 'Enter the text for your post'
 
 
-@bot.on.private_message(state=PostData.TITLE)
+@bot.on.private_message(state=PostData.TEXT)
 async def post_title(message: Message):
     if len(message.text) > 1000:
         await message.answer('The text should not be longer than 1000 characters')
@@ -76,5 +92,6 @@ async def post_title(message: Message):
         data=text,
         category=category
     )
+    await bot.state_dispenser.delete(message.peer_id)
 
-    return 'Post was successfully created!\nHere it is:\n\nCategory: {category}\nTitle: {title}\nPost: {text}'
+    return f'Post was successfully created!\nHere it is:\n\nCategory: {category}\nTitle: {title}\nPost: {text}'

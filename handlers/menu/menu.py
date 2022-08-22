@@ -1,3 +1,4 @@
+from unicodedata import category
 from vkbottle.bot import Blueprint, Message
 from vkbottle import Keyboard, KeyboardButtonColor, Text
 
@@ -52,6 +53,7 @@ async def get_coins(message: Message):
                     age=user.age,
                     about=user.about,
                     coins=user.coins+1,
+                    category=user.category,
                     bonus=1
                     )
             await message.answer('You got 1 coin', keyboard=keyboard)

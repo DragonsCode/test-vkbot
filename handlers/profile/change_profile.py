@@ -1,7 +1,7 @@
 from vkbottle.bot import Blueprint, Message
-from vkbottle import Keyboard, Text
+from vkbottle import Keyboard, Text, EMPTY_KEYBOARD
 
-from states import ChangeData, ctx
+from states import ChangeProfileData, ctx
 from models.db_api import methods as db
 
 
@@ -10,7 +10,7 @@ bot = Blueprint('change_profile')
 
 @bot.on.private_message(lev='Change profile')
 async def choose_change(message: Message):
-    keyboard = Keyboard(one_time=True)
+    keyboard = Keyboard()
 
     keyboard.add(Text('Name'))
     keyboard.add(Text('Age'))
@@ -24,13 +24,13 @@ async def choose_change(message: Message):
         return
     
     ctx.set(message.peer_id, {})
-    await bot.state_dispenser.set(message.peer_id, ChangeData.WHAT)
+    await bot.state_dispenser.set(message.peer_id, ChangeProfileData.WHAT)
     await message.answer('What do you want to change?', keyboard=keyboard)
 
 
-@bot.on.private_message(state=ChangeData.WHAT)
+@bot.on.private_message(state=ChangeProfileData.WHAT)
 async def enter_change(message: Message):
-    keyboard = Keyboard(one_time=True)
+    keyboard = Keyboard()
 
     keyboard.add(Text('News'))
     keyboard.add(Text('Gaming'))
@@ -42,26 +42,31 @@ async def enter_change(message: Message):
     data['what'] = message.text.lower()
     ctx.set(message.peer_id, data)
     if message.text in ['Name', 'Age', 'About']:
-        await message.answer(f'Enter your {message.text.lower()}')
-        await bot.state_dispenser.set(message.peer_id, ChangeData.CHANGE)
+        await message.answer(f'Enter your {message.text.lower()}', keyboard=EMPTY_KEYBOARD)
+        await bot.state_dispenser.set(message.peer_id, ChangeProfileData.CHANGE)
     elif message.text == 'Category':
         await message.answer(f'Choose your {message.text.lower()}', keyboard=keyboard)
+        await bot.state_dispenser.set(message.peer_id, ChangeProfileData.CHANGE)
     else:
         await message.answer('Please choose from keyboard')
 
 
-@bot.on.private_message(state=ChangeData.CHANGE)
+@bot.on.private_message(state=ChangeProfileData.CHANGE)
 async def change(message: Message):
     data = ctx.get(message.peer_id)
     what = data['what']
+
     user = await db.get_user(id=message.peer_id)
+
     text = f'Your {what} has been changed to {message.text}'
+
+
     if what == 'name':
         if len(message.text) > 100:
             await message.answer('Your name should not be longer than 100 characters')
             return
         
-        await db.change_user(
+        await db.edit_user(
             id=user.id,
             name=message.text,
             age=user.age,
@@ -72,9 +77,11 @@ async def change(message: Message):
             )
         await bot.state_dispenser.delete(message.peer_id)
         return text
+    
+    
     elif what == 'age':
         if message.text.isdigit() and int(message.text) > 14 and int(message.text) < 100:
-            await db.change_user(
+            await db.edit_user(
                 id=user.id,
                 name=user.name,
                 age=int(message.text),
@@ -87,12 +94,14 @@ async def change(message: Message):
             return text
         else:
             return 'Enter your age correctly, from 15 to 99'
+    
+    
     elif what == 'about':
         if len(message.text) > 500:
             await message.answer('Too long, you should use no more than 500 characters')
             return
         
-        await db.change_user(
+        await db.edit_user(
             id=user.id,
             name=user.name,
             age=user.age,
@@ -103,11 +112,14 @@ async def change(message: Message):
             )
         await bot.state_dispenser.delete(message.peer_id)
         return text
+    
+    
     elif what == 'category':
         if message.text not in ['News', 'Gaming', 'IT', 'Economy']:
             await message.answer('Choose from keyboard')
+            return
         
-        await db.change_user(
+        await db.edit_user(
             id=user.id,
             name=user.name,
             age=user.age,
@@ -117,4 +129,4 @@ async def change(message: Message):
             bonus=user.bonus
             )
         await bot.state_dispenser.delete(message.peer_id)
-        return text
+        await message.answer(text, keyboard=EMPTY_KEYBOARD)

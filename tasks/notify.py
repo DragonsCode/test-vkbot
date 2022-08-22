@@ -6,6 +6,8 @@ from models.db_api import methods as db
 
 async def notify():
     users = await db.get_user()
+    adm = await db.get_user(id=-1)
+    users.remove(adm)
     for user in users:
         date = datetime.now() - user.last_time
         if date > timedelta(minutes=5):

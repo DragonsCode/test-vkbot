@@ -34,7 +34,7 @@ class User(Base, ModelAdmin):
         return (
             f"<{self.__class__.__name__}("
             f"id={self.id}, "
-            f"full_name={self.name}, "
+            f"name={self.name}, "
             f"about={self.about}, "
             f"coins={self.coins}, "
             f"category={self.category}"

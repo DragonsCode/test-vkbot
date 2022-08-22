@@ -23,12 +23,14 @@ class ModelAdmin:
         await async_db_session.commit()
 
     @classmethod
-    async def get(cls, peer=False, id=False):
+    async def get(cls, peer=False, id=False, num=False):
         query = None
         if peer:
             query = select(cls).where(cls.peer == peer)
         elif id:
             query = select(cls).where(cls.id == id)
+        elif num:
+            query = select(cls).where(cls.num == num)
         else:
             query = select(cls)
         results = await async_db_session.execute(query)
@@ -36,12 +38,14 @@ class ModelAdmin:
         return result
     
     @classmethod
-    async def get_all(cls, peer=False, id=False):
+    async def get_all(cls, peer=False, id=False, category=False):
         query = None
         if peer:
             query = select(cls).where(cls.peer == peer)
         elif id:
             query = select(cls).where(cls.id == id)
+        elif category:
+            query = select(cls).where(cls.category == category)
         else:
             query = select(cls)
         results = None

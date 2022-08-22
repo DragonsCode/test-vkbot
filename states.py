@@ -21,3 +21,9 @@ class PostData(BaseStateGroup):
     CATEGORY = 0
     TITLE = 1
     TEXT = 2
+
+
+class ChangePostData(BaseStateGroup):
+
+    WHAT = 0
+    CHANGE = 1

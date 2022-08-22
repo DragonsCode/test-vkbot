@@ -9,12 +9,12 @@ from models.user import User
 
 
 class methods:
-    async def get_user(id: int=0, peer: int=0, category: str=0):
-        if id:
-            user = await User.get(num=id)
+    async def get_user(num: int=0, id: int=0, category: str=0):
+        if num:
+            user = await User.get(num=num)
             return user
-        elif peer:
-            user = await User.get_by_id(id=peer)
+        elif id:
+            user = await User.get(id=id)
             return user
         elif category:
             user = await User.get_all(category=category)
@@ -75,11 +75,7 @@ class methods:
         )
         return
 
-    async def edit_post(id: int, peer: int, title: str, data: str, category: str, block: bool=False):
-        if block:
-            post = await Post.get(id=id)
-            post.delete()
-            await async_db_session.commit()
+    async def edit_post(id: int, peer: int, title: str, data: str, category: str):
         await Post.updater(
             id=id,
             peer=peer,
@@ -88,4 +84,9 @@ class methods:
             category=category
         )
         return
+    
+    async def delete_post(id: int):
+        post = await Post.get(id=id)
+        await async_db_session.delete(post)
+        await async_db_session.commit()
 
